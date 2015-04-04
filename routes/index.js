@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var http = require('http');
 var restler = require('restler');
+var cheerio = require('cheerio');
 
 router.get('/', function(req, res) {
   res.render('index');
@@ -28,7 +29,9 @@ router.get('/redditTop100', function(req, res) {
         } else if (url.match(re_imgur)) {
           var urlFromImgur = getFromImgur(url);
           if (urlFromImgur !== "") {
-            items.push(urlFromImgur);
+            urlFromImgur.forEach(function(url) {
+              items.push(url);
+            });
           }
         }
       }
@@ -39,24 +42,23 @@ router.get('/redditTop100', function(req, res) {
 });
 
 function getFromImgur(url) {
-  var hash = url.split("/").pop();
-  var imgur = "http://imgur.com/" + "gallery/" + hash + ".json";
-  console.log(imgur);
-  restler.get(imgur).on('complete', function(imgurjson) {
-    if (typeof imgurjson.data !== "undefined") {
-      var imgurimage = imgurjson.data.image;
-      if (imgurimage.is_album === false) {
-        var imgururl = "http://i.imgur.com/" + hash + imgurimage.ext;
-        var urlType;
-        console.log(imgururl);
-        if (imgurimage.ext === 'gifv') {
-          urlType = 'vid';
-        } else {
-          urlType = 'img';
-        }
-        return {url: imgururl, urlType: urlType};
+  restler.get(url).on('complete', function(imgur) {
+    $ = cheerio.load(imgur);
+    var result = [];
+    var images = $("#image .image img");
+    images.each(function(index, image) {
+      if (index > 0) {
+        console.log(image.attribs.src);
       }
-    }
+      var url = image.attribs.src;
+      if (url.split('.').pop() === 'gifv') {
+        var urlType = 'vid';
+      } else {
+        var urlType = 'img';
+      }
+      result.push({url: url, urlType: urlType});
+    })
+    return result;
   });
   return "";
 }

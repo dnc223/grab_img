@@ -1,5 +1,6 @@
 $("#redditTop100").on('click', function(e) {
   e.preventDefault();
+  $("#content").html("<div id='loading'><img src='images/loading.gif'></div>");
   $.getJSON("redditTop100", function(entries) {
     var items = [];
     console.log(items);
