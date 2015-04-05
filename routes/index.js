@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var http = require('http');
-var restler = require('restler');
+var rest = require('restler');
 var cheerio = require('cheerio');
 
 router.get('/', function(req, res) {
@@ -11,9 +11,9 @@ router.get('/', function(req, res) {
 urlRedditTop100 = 'http://reddit.com/.json?limit=100'
 
 router.get('/redditTop100', function(req, res) {
-  restler.get(urlRedditTop100).on('complete', function(reddit) {
-    items = [];
-    var entries = reddit.data.children.slice(1);
+  items = [];
+  rest.get(urlRedditTop100).on('complete', function(reddit) {
+    var entries = reddit.data.children;
     var re_img = /gif$|png$|jpe?g$/;
     var re_gifv = /gifv$/;
     var re_imgur = /imgur\.com/;
@@ -27,12 +27,8 @@ router.get('/redditTop100', function(req, res) {
           url = url.replace(re_gifv, 'webm');
           items.push({url: url, urlType: 'vid'});
         } else if (url.match(re_imgur)) {
-          var urlFromImgur = getFromImgur(url);
-          if (urlFromImgur !== "") {
-            urlFromImgur.forEach(function(url) {
-              items.push(url);
-            });
-          }
+          
+          items.push({imgOrVid: false, url: url});
         }
       }
     });
@@ -41,26 +37,27 @@ router.get('/redditTop100', function(req, res) {
   });
 });
 
-function getFromImgur(url) {
-  restler.get(url).on('complete', function(imgur) {
-    $ = cheerio.load(imgur);
-    var result = [];
-    var images = $("#image .image img");
+router.post('/imgur', function(req, res) {
+  var url = req.body.url;
+  console.log(url);
+  var result = [];
+  rest.get(url).on('complete', function(imgur) {
+    var $ = cheerio.load(imgur);
+    var images = $('#image').find('img');
     images.each(function(index, image) {
-      if (index > 0) {
-        console.log(image.attribs.src);
-      }
       var url = image.attribs.src;
-      if (url.split('.').pop() === 'gifv') {
+      var ext = url.split('.').pop();
+      if (ext === 'webm') {
         var urlType = 'vid';
       } else {
         var urlType = 'img';
       }
-      result.push({url: url, urlType: urlType});
-    })
-    return result;
+      result.push({url: 'http:' + url, urlType: urlType});
+    });
+    console.log(result);
+    res.setHeader('Content-Type', 'application/json');
+    res.json(result);
   });
-  return "";
-}
+});
 
 module.exports = router;
