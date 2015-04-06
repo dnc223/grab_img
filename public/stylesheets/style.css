@@ -69,14 +69,14 @@ a.selected {
 
 .title-container {
   font-size: 12px;
-  padding: 10px 8px 8px 8px;
+  padding: 12px 8px 8px 12px;
   color: #2FCEFA;
   background-color: #111;
 }
 
 .permalink-container {
   font-size: 11px;
-  padding-left: 8px;
+  padding-left: 12px;
   padding-bottom: 8px;
   color: #2FCEFA;
   background-color: #111;
