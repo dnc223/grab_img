@@ -8,7 +8,7 @@ router.get('/', function(req, res) {
   res.render('index');
 });
 
-urlRedditTop100 = 'http://reddit.com/.json?limit=100'
+var urlRedditTop100 = 'http://reddit.com/.json?limit=100';
 
 router.get('/redditTop100', function(req, res) {
   items = [];
@@ -17,18 +17,18 @@ router.get('/redditTop100', function(req, res) {
     var re_img = /gif$|png$|jpe?g$/;
     var re_gifv = /gifv$/;
     var re_imgur = /imgur\.com/;
-
     entries.forEach(function(entry) {
       var url = entry.data.url;
+      var title = entry.data.title;
+      var permalink = entry.data.permalink;
       if (entry.data.over_18 === false) {
         if (url.match(re_img)) {
-          items.push({url: url, urlType: 'img'});
+          items.push({url: url, urlType: 'img', permalink: permalink, title: title});
         } else if (url.match(re_gifv)) {
           url = url.replace(re_gifv, 'webm');
-          items.push({url: url, urlType: 'vid'});
+          items.push({url: url, urlType: 'vid', permalink: permalink, title: title});
         } else if (url.match(re_imgur)) {
-          
-          items.push({imgOrVid: false, url: url});
+          items.push({imgOrVid: false, url: url, permalink: permalink, title: title});
         }
       }
     });
@@ -39,11 +39,12 @@ router.get('/redditTop100', function(req, res) {
 
 router.post('/imgur', function(req, res) {
   var url = req.body.url;
-  console.log(url);
+  var title = req.body.title;
+  var permalink = req.body.permalink;
   var result = [];
   rest.get(url).on('complete', function(imgur) {
     var $ = cheerio.load(imgur);
-    var images = $('#image').find('img');
+    var images = $('.image').find('img');
     images.each(function(index, image) {
       var url = image.attribs.src;
       var ext = url.split('.').pop();
@@ -54,9 +55,8 @@ router.post('/imgur', function(req, res) {
       }
       result.push({url: 'http:' + url, urlType: urlType});
     });
-    console.log(result);
     res.setHeader('Content-Type', 'application/json');
-    res.json(result);
+    res.json({urls: result, permalink: permalink, title: title});
   });
 });
 

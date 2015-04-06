@@ -15,10 +15,6 @@ body {
   width: 600px;
 }
 
-#content > .image-container:first-of-type {
-  border-top: 6px solid #2FCEFA;
-}
-
 .image-container {
   width: 600px;
   height: auto;
@@ -28,13 +24,12 @@ body {
   margin-top: 0;
   padding: 0;
   background-color: #ddd;
-  border-bottom: 6px solid #2FCEFA;
+  border-top: 12px solid #2FCEFA;
 }
 
 img, video {
   display: block;
   max-width: 100%;
-  max-height: auto;
   margin-left: auto;
   margin-right: auto;
   margin-top: 0;
@@ -72,3 +67,17 @@ a.selected {
   margin-top: 40px;
 }
 
+.title-container {
+  font-size: 12px;
+  padding: 10px 8px 8px 8px;
+  color: #2FCEFA;
+  background-color: #111;
+}
+
+.permalink-container {
+  font-size: 11px;
+  padding-left: 8px;
+  padding-bottom: 8px;
+  color: #2FCEFA;
+  background-color: #111;
+}
